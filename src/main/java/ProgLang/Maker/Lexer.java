@@ -5,11 +5,11 @@ import java.util.regex.Pattern;
 
 enum TokenType{
     /*Single Character Tokens */
-    PLUS, MINUS, STAR, SLASH, //Operators 
+    PLUS, MINUS, STAR, SLASH, MODULO,//Operators 
     RIGHTPAREN, LEFTPAREN, //Parenthesis
     LEFTBRACE, RIGHTBRACE,
     SEMICOLON, COMMA,
-    LEFTBRACKET,RIGHTBRACKET, DOUBLEQUOTE, DOT,
+    LEFTBRACKET,RIGHTBRACKET, DOT,
     /*Character Tokens for Comparators */
     GREATERTHAN, GREATERTHAN_EQUAL,
     LESSTHAN, LESSTHAN_EQUAL,
@@ -58,11 +58,14 @@ public class Lexer{
     public void lex(){
         stringMarcher = 0;
         try{
-        while(stringMarcher<line.length()){
+        while(isNotEnding()){
             TokenRecognizer();
             System.out.println("Token: ["+tokenList.getLast().toString()+"]");
         }
-        }catch (Exception e){
+        }catch(UnrecognizedTokenException e){
+            System.out.println(e.getMessage());
+        }
+        catch (Exception e){
             System.out.println("Something went wrong!");
             e.printStackTrace();
         }
@@ -73,6 +76,8 @@ public class Lexer{
              lexeme += String.valueOf(charRead());   
              forward();
             }
+            addIdentifier(TokenType.NUMBER, lexeme);
+            lexeme = "";
         }
         if(isAlphabet(charRead())){
             while(isAlphaNumeric(charRead())){
@@ -101,8 +106,8 @@ public class Lexer{
         }
         //Recognizes single type tokens.
          switch(charRead()){
-            case '.' -> addToken(TokenType.DOT);
-            case '!' -> addToken(TokenType.NOT);
+          
+            //Closing and Opening Braces
             case '(' -> addToken(TokenType.LEFTPAREN);
             case ')' -> addToken(TokenType.RIGHTPAREN);
             case '[' -> addToken(TokenType.LEFTBRACE);
@@ -110,11 +115,40 @@ public class Lexer{
             case '{' -> addToken(TokenType.LEFTBRACKET);
             case '}' -> addToken(TokenType.RIGHTBRACKET);
             case ';' -> addToken(TokenType.SEMICOLON);
+            //Operator beside division
             case '-' -> addToken(TokenType.MINUS);
             case '+' -> addToken(TokenType.PLUS);
             case '*' -> addToken(TokenType.STAR);
+            case '%' -> addToken(TokenType.MODULO);
+
             case ',' -> addToken(TokenType.COMMA);
-            case '"' -> addToken(TokenType.DOUBLEQUOTE);
+            case '.' -> addToken(TokenType.DOT);
+            case '!' -> addToken(TokenType.NOT);
+            // Beyond here is more special characters.
+            case '"' -> {
+                lexeme = "\"";
+                forward();
+                while(charRead()!= '"'){
+                    if(charRead() == '\\'){
+                        addIdentifier(TokenType.STRING,lexeme);
+                        switch(charLookAhead()){
+                            case '\\' -> addToken(TokenType.ESCBACKSLASH);
+                            case '\'' -> addToken(TokenType.ESCQUOTE);
+                            case '\"' -> addToken(TokenType.ESCDOUBLEQUOTE);
+                            case 'n' -> addToken(TokenType.NEWLINE);
+                            case 't' -> addToken(TokenType.TAB);
+                            case 'f' -> addToken(TokenType.FORMFEED);
+                            case 'b' -> addToken(TokenType.BACKSPACE);
+                            case 'r' -> addToken(TokenType.CARRIAGERETURN);
+                            default -> throw new UnrecognizedTokenException("Unexpected Token! "+ currentLine +" "+charRead());
+                            }
+                        forward(); forward(); lexeme = ""; }
+                    lexeme+= charRead();
+                    forward();
+                }
+                addIdentifier(TokenType.STRING,lexeme);
+                lexeme ="";
+            }
             case '|' -> {if(charLookAhead() == '|')
                         addToken(TokenType.BINARYOR);
                         else
@@ -123,7 +157,7 @@ public class Lexer{
                         addToken(TokenType.BINARYAND);
                         else 
                         throw new UnrecognizedTokenException("Unrecognized Token at Line: "+currentLine+" Expected: &");}
-            // Beyond here is more special characters.
+ 
             case '/' ->{  
                 switch (charLookAhead()) {
                 case '/' -> addToken(TokenType.SINGLECOMMENT);
@@ -132,15 +166,7 @@ public class Lexer{
                 }
                 forward();
             }
-            case '\\' -> {
-                switch(charLookAhead()){
-                    case '\\' -> addToken(TokenType.ESCBACKSLASH);
-                    case '\'' -> addToken(TokenType.ESCQUOTE);
-                    case '\"' -> addToken(TokenType.ESCDOUBLEQUOTE);
-                    case 'n' -> addToken(TokenType.NEWLINE);
-                    case 't' -> addToken(TokenType.TAB);
-                    }
-                forward();}
+            
                 case ' ' -> {}
                 default -> throw new UnrecognizedTokenException("Unrecognized Token!"+charRead());
             }
@@ -164,8 +190,8 @@ public class Lexer{
     private void forward(){
         stringMarcher++;
     }
-    private boolean ending(){
-        return stringMarcher >= line.length();
+    private boolean isNotEnding(){
+        return stringMarcher < line.length();
     }
     private void addToken(TokenType type){
         this.tokenList.add(new Token(type,currentLine));
