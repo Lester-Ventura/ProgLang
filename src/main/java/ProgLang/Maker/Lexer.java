@@ -74,7 +74,7 @@ public class Lexer{
         }
     }
     private void TokenRecognizer() throws UnrecognizedTokenException{
-
+        //Checks for Numbers.
         if(isNumerical(charRead())){
             while(isNumerical(charRead())){
              lexeme += String.valueOf(charRead());   
@@ -84,6 +84,7 @@ public class Lexer{
             lexeme = "";
             return;
         }
+        //Checks if it is an alphabet
         if(isAlphabet(charRead())){
             while(isAlphaNumeric(charRead())){
             lexeme += String.valueOf(charRead());
@@ -112,7 +113,6 @@ public class Lexer{
         }
         //Recognizes single type tokens.
          switch(charRead()){
-          
             //Closing and Opening Braces
             case '(' -> addToken(TokenType.LEFTPAREN);
             case ')' -> addToken(TokenType.RIGHTPAREN);
@@ -148,6 +148,7 @@ public class Lexer{
                     addToken(TokenType.GREATERTHAN);
             }
             // Beyond here is more special characters.
+            // String consumption, if it is a string, it consumes EVERYTHING.
             case '"' -> {
                 lexeme = "\"";
                 forward();
