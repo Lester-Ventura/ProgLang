@@ -29,19 +29,22 @@ class Token{
     final TokenType type;
     final String lexeme;
     final int line;
-    Token(TokenType type,String lexeme,int line){
+    final int column;
+    Token(TokenType type,String lexeme,int line, int column){
         this.type = type;
         this.lexeme = lexeme;
         this.line = line;
+        this.column = column;
     }
-    Token(TokenType type, int line){
+    Token(TokenType type, int line, int column){
         this.type = type;
         this.lexeme = null;
         this.line = line;
+        this.column = column;
     }
     @Override
     public String toString(){
-        return "Type: "+type+" |Lexeme: "+lexeme+" |Line: "+line;
+        return "Type: "+type+" |Lexeme: "+lexeme+" |Line: "+line+"|Column: "+column;
     }
 }
 public class Lexer{
@@ -71,6 +74,7 @@ public class Lexer{
         }
     }
     private void TokenRecognizer() throws UnrecognizedTokenException{
+        
         if(isNumerical(charRead())){
             while(isNumerical(charRead())){
              lexeme += String.valueOf(charRead());   
@@ -78,6 +82,7 @@ public class Lexer{
             }
             addIdentifier(TokenType.NUMBER, lexeme);
             lexeme = "";
+            return;
         }
         if(isAlphabet(charRead())){
             while(isAlphaNumeric(charRead())){
@@ -103,6 +108,7 @@ public class Lexer{
                 default -> addIdentifier(TokenType.IDENTIFIER,lexeme);
           }
             lexeme = "";
+            return;
         }
         //Recognizes single type tokens.
          switch(charRead()){
@@ -120,7 +126,7 @@ public class Lexer{
             case '+' -> addToken(TokenType.PLUS);
             case '*' -> addToken(TokenType.STAR);
             case '%' -> addToken(TokenType.MODULO);
-
+            case '=' -> addToken(TokenType.EQUAL);
             case ',' -> addToken(TokenType.COMMA);
             case '.' -> addToken(TokenType.DOT);
             case '!' -> addToken(TokenType.NOT);
@@ -168,7 +174,7 @@ public class Lexer{
             }
             
                 case ' ' -> {}
-                default -> throw new UnrecognizedTokenException("Unrecognized Token!"+charRead());
+                default -> throw new UnrecognizedTokenException("Unrecognized Token! \""+charRead()+"\"");
             }
             forward();
     }
@@ -194,10 +200,10 @@ public class Lexer{
         return stringMarcher < line.length();
     }
     private void addToken(TokenType type){
-        this.tokenList.add(new Token(type,currentLine));
+        this.tokenList.add(new Token(type,this.currentLine,this.stringMarcher));
     }
     private void addIdentifier(TokenType type,String identifier){
-        this.tokenList.add(new Token(type,identifier,currentLine));
+        this.tokenList.add(new Token(type,identifier,this.currentLine,this.stringMarcher));
     }
     public boolean isAlphabet(char c){
         return Pattern.compile("[a-zA-Z]").matcher(String.valueOf(c)).matches();
