@@ -74,7 +74,7 @@ public class Lexer{
         }
     }
     private void TokenRecognizer() throws UnrecognizedTokenException{
-        
+
         if(isNumerical(charRead())){
             while(isNumerical(charRead())){
              lexeme += String.valueOf(charRead());   
@@ -130,6 +130,23 @@ public class Lexer{
             case ',' -> addToken(TokenType.COMMA);
             case '.' -> addToken(TokenType.DOT);
             case '!' -> addToken(TokenType.NOT);
+            //Comparators 
+            case '<' -> {
+                if(charLookAhead()=='='){
+                    addToken(TokenType.LESSTHAN_EQUAL);
+                    forward();
+                }
+                else
+                    addToken(TokenType.LESSTHAN);
+            }
+            case '>' -> {
+                if(charLookAhead()=='='){
+                    addToken(TokenType.GREATERTHAN_EQUAL);
+                    forward();
+                }
+                else
+                    addToken(TokenType.GREATERTHAN);
+            }
             // Beyond here is more special characters.
             case '"' -> {
                 lexeme = "\"";
@@ -152,7 +169,7 @@ public class Lexer{
                     lexeme+= charRead();
                     forward();
                 }
-                addIdentifier(TokenType.STRING,lexeme);
+                addIdentifier(TokenType.STRINGWORD,lexeme);
                 lexeme ="";
             }
             case '|' -> {if(charLookAhead() == '|')

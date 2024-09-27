@@ -8,7 +8,7 @@ package ProgLang.Maker;
 public class ProgLang {
     public static void main(String[] args) {    
         Lexer lexicon = new Lexer();
-        lexicon.addLineCode("-+*/ while()");
+        lexicon.addLineCode("-+*/ while(i<=)");
         lexicon.lex();
         lexicon.addLineCode("int i = 0");
         lexicon.lex();
