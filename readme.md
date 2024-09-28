@@ -8,6 +8,7 @@ A java while-do loop parser built on Java :3
 
 ```json
 {
-  "java.debug.settings.onBuildFailureProceed": true
+  "java.debug.settings.onBuildFailureProceed": true,
+  "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-22" // or your jdk version here
 }
 ```
