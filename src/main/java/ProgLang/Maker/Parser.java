@@ -6,13 +6,10 @@ public class Parser {
     int current = 0;
     Parser(List<Token> tokens){
         this.tokens = tokens;
+        System.out.println();
     }
     public void parse(){
-        List<TokenType> currentSentence = new ArrayList<>();
-        for(Token currentToken:tokens){
-            
-        }
-        
+              
     }
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
@@ -42,4 +39,5 @@ public class Parser {
       private Token previous() {
         return tokens.get(current - 1);
       }
+      
 }

@@ -1,5 +1,6 @@
 package ProgLang.Maker;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -9,7 +10,7 @@ enum TokenType{
     RIGHTPAREN, LEFTPAREN, //Parenthesis
     LEFTBRACE, RIGHTBRACE,
     SEMICOLON, COMMA,
-    LEFTBRACKET,RIGHTBRACKET, DOT,
+    LEFTBRACKET,RIGHTBRACKET, DOT, DOUBLEQUOTE,
     /*Character Tokens for Comparators */
     GREATERTHAN, GREATERTHAN_EQUAL,
     LESSTHAN, LESSTHAN_EQUAL,
@@ -19,11 +20,11 @@ enum TokenType{
     /* Slash and Backslash */
     SINGLECOMMENT, MULTICOMMENT, ESCBACKSLASH, ESCQUOTE, ESCDOUBLEQUOTE,
     /*Literals + Variable*/
-    STRINGWORD, NUMBER, IDENTIFIER, 
+    STRINGWORD, NUMBER, IDENTIFIER, FLOATNUM,
     /*Reserved Keywords*/
     WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,
     /*Special Characters */
-    DOLLAR, NEWLINE, TAB, CARRIAGERETURN, BACKSPACE, FORMFEED
+    DOLLAR
 }
 class Token{
     final TokenType type;
@@ -63,14 +64,16 @@ public class Lexer{
         try{
         while(isNotEnding()){
             TokenRecognizer();
-            System.out.println("Token: ["+tokenList.getLast().toString()+"]");
+        }
+        Iterator<Token> tokenIterator = tokenList.iterator();
+        while(tokenIterator.hasNext()){
+            System.out.println("Token: ["+tokenIterator.next().toString()+"]");
         }
         }catch(UnrecognizedTokenException e){
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
         catch (Exception e){
-            System.out.println("Something went wrong!");
-            e.printStackTrace();
+            System.err.println("Something went wrong!");
         }
     }
     private void TokenRecognizer() throws UnrecognizedTokenException{
@@ -80,7 +83,11 @@ public class Lexer{
              lexeme += String.valueOf(charRead());   
              forward();
             }
-            addIdentifier(TokenType.NUMBER, lexeme);
+            if(charRead()=='f'){
+                addIdentifier(TokenType.FLOATNUM,lexeme);
+            }
+            else 
+                addIdentifier(TokenType.NUMBER, lexeme);
             lexeme = "";
             return;
         }
@@ -149,27 +156,13 @@ public class Lexer{
             }
             // Beyond here is more special characters.
             // String consumption, if it is a string, it consumes EVERYTHING.
-            case '"' -> {
-                lexeme = "\"";
-                forward();
-                while(charRead()!= '"'){
-                    if(charRead() == '\\'){
-                        addIdentifier(TokenType.STRING,lexeme);
-                        switch(charLookAhead()){
-                            case '\\' -> addToken(TokenType.ESCBACKSLASH);
-                            case '\'' -> addToken(TokenType.ESCQUOTE);
-                            case '\"' -> addToken(TokenType.ESCDOUBLEQUOTE);
-                            case 'n' -> addToken(TokenType.NEWLINE);
-                            case 't' -> addToken(TokenType.TAB);
-                            case 'f' -> addToken(TokenType.FORMFEED);
-                            case 'b' -> addToken(TokenType.BACKSPACE);
-                            case 'r' -> addToken(TokenType.CARRIAGERETURN);
-                            default -> throw new UnrecognizedTokenException("Unexpected Token! "+ currentLine +" "+charRead());
-                            }
-                        forward(); forward(); lexeme = ""; }
+            case '\"' -> {
+                do{
                     lexeme+= charRead();
                     forward();
-                }
+                }while(charRead()!= '"');
+                lexeme += charRead();
+                forward();
                 addIdentifier(TokenType.STRINGWORD,lexeme);
                 lexeme ="";
             }
