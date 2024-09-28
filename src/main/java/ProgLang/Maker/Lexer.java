@@ -18,9 +18,9 @@ enum TokenType{
     BINARYOR, BINARYAND,
     NOT,
     /* Slash and Backslash */
-    SINGLECOMMENT, MULTICOMMENT, ESCBACKSLASH, ESCQUOTE, ESCDOUBLEQUOTE,
+    SINGLECOMMENT, MULTICOMMENT, 
     /*Literals + Variable*/
-    STRINGWORD, NUMBER, IDENTIFIER, FLOATNUM,
+    STRINGWORD, NUMBER, IDENTIFIER, FLOATNUM, DOUBLENUM, LONGNUM,
     /*Reserved Keywords*/
     WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,
     /*Special Characters */
@@ -80,21 +80,22 @@ public class Lexer{
         //Checks for Numbers.
         if(isNumerical(charRead())){
             while(isNumerical(charRead())){
-             lexeme += String.valueOf(charRead());   
+             lexeme += charRead();   
              forward();
             }
-            if(charRead()=='f'){
-                addIdentifier(TokenType.FLOATNUM,lexeme);
+            switch(Character.toLowerCase(charRead())){
+               case 'f' ->addIdentifier(TokenType.FLOATNUM,lexeme);
+               case 'd' ->addIdentifier(TokenType.DOUBLENUM,lexeme);
+               case 'l' ->addIdentifier(TokenType.LONGNUM, lexeme);
+               default -> addIdentifier(TokenType.NUMBER,lexeme);
             }
-            else 
-                addIdentifier(TokenType.NUMBER, lexeme);
             lexeme = "";
             return;
         }
         //Checks if it is an alphabet
         if(isAlphabet(charRead())){
             while(isAlphaNumeric(charRead())){
-            lexeme += String.valueOf(charRead());
+            lexeme += charRead();
             forward();
             }
             switch(lexeme){
