@@ -16,7 +16,7 @@ enum TokenType{
     LESSTHAN, LESSTHAN_EQUAL,
     EQUAL, EQUAL_EQUAL,
     BINARYOR, BINARYAND,
-    NOT,
+    NOT, NOT_EQUALS,
     /* Slash and Backslash */
     SINGLECOMMENT, MULTICOMMENT, 
     /*Literals + Variable*/
@@ -24,7 +24,18 @@ enum TokenType{
     /*Reserved Keywords*/
     WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,
     /*Special Characters */
-    DOLLAR
+    DOLLAR, UNDERSCORE,
+    /* Special Functions */
+    INCREMENT, DECREMENT,
+
+    // Complex Grammar Forms, Delete later if it doesn't fit
+    /* While Do */
+    WHILE_DO,
+    /* Co */
+    /* Constants */
+    BOOLEAN_LITERAL,
+    /* Callable/Variable Statements */
+    CALL, CALLABLE, FUNCTION, ARGS
 }
 class Token{
     final TokenType type;
@@ -130,14 +141,38 @@ public class Lexer{
             case '}' -> addToken(TokenType.RIGHTBRACKET);
             case ';' -> addToken(TokenType.SEMICOLON);
             //Operator beside division
-            case '-' -> addToken(TokenType.MINUS);
-            case '+' -> addToken(TokenType.PLUS);
+            case '-' -> {
+                if (charLookAhead() == '-') {
+                    addToken(TokenType.DECREMENT);
+                    forward();
+                } else 
+                    addToken(TokenType.MINUS);
+            }
+            case '+' -> {
+                if (charLookAhead() == '+') {
+                    addToken(TokenType.INCREMENT);
+                    forward();
+                } else 
+                    addToken(TokenType.PLUS);
+            }
             case '*' -> addToken(TokenType.STAR);
             case '%' -> addToken(TokenType.MODULO);
-            case '=' -> addToken(TokenType.EQUAL);
+            case '=' -> {
+                if (charLookAhead() == '=') {
+                    addToken(TokenType.EQUAL_EQUAL);
+                    forward();
+                } else 
+                  addToken(TokenType.EQUAL);
+            }
             case ',' -> addToken(TokenType.COMMA);
             case '.' -> addToken(TokenType.DOT);
-            case '!' -> addToken(TokenType.NOT);
+            case '!' ->  {
+                if (charLookAhead() == '=') {
+                    addToken(TokenType.NOT_EQUALS);
+                    forward();
+                } else 
+                addToken(TokenType.NOT); 
+            }
             //Comparators 
             case '<' -> {
                 if(charLookAhead()=='='){
