@@ -6,7 +6,7 @@ public class Parser {
     private int current = 0;
     Parser(List<Token> tokens){
         this.tokens = tokens;
-        System.out.println();
+        System.out.println("Tokens have been loaded!");
     }
     public void parse(){
         try {
@@ -24,24 +24,72 @@ public class Parser {
         switch(peek().type){
           case TokenType.WHILE -> whileExpr();
           case TokenType.COMMENT -> {continue;}
-          case TokenType.EOF -> {return;}
+          case TokenType.EOF -> {
+            System.err.println("Parsing finished!");
+            return;
+          }
           default -> complain("while");
         }
+        tokens.iterator();
       }
     }
+    /**
+     * <while_do> → while (<condition>) <block> | while (condition) <statement>
+     * @throws ExpressionException
+     */
     private void whileExpr() throws ExpressionException{
-      
+      condition();
     }
-    private void whileCondition() throws ExpressionException{
+    private void condition() throws ExpressionException{
+      // gets out of while token
+      advance();
+      if(!(check(TokenType.LEFTPAREN)))
+        complain("Left Parentheses");
+      else
+        advance();
 
+      comparison();
+
+      if(!(check(TokenType.RIGHTPAREN)))
+        complain("Right Parentheses");
+      else 
+        advance();
     }
-    private void comparison() throws ExpressionException{
-        if(!(match(numbers())||match(TokenType.CALLABLE)));
-          complain("Numbers or Function");
+    private void comparison() throws ExpressionException {
+      if (check(booleanLiteral()))
+        advance();
+      else if (check(numbers()) || check(TokenType.IDENTIFIER)) {
+        advance();
+        if (!check(comparators()))
+          complain("Comparators");
+        else
+          advance();
+        
+        if (!(check(numbers()) || check(TokenType.IDENTIFIER))) 
+          complain("Number or Identifier");
+        else 
+          advance();
+      } 
+      // TODO: Implement rest of options
+      // else if (check(TokenType.NOT)) {
+      //   while (check(TokenType.NOT)) {
+      //     advance();
+      //   }
+      //   if(!(check(numbers()) || check(TokenType.IDENTIFIER))) {
+      //     complain("Numbers or Function");
+      //   }
+      // }
+      else {
+        complain("Comparison");
+      }
+      
+      
+      
         
      }
     private void statement() throws ExpressionException{
-      
+      if(!(check(unary()) || check(TokenType.CALLABLE) || check(control())));
+          complain("Numbers or Function");
     }
     //Beyond here are the terminals or a combination of terminals.
     private TokenType[] comparators(){
@@ -101,9 +149,14 @@ public class Parser {
         }
         return false;
       }
-    private boolean check(TokenType type) {
-        if (isAtEnd()) return false;
-        return peek().type == type;
+    
+    private boolean check(TokenType... types) {
+      if (isAtEnd()) return false;
+
+      for (TokenType type : types) {
+        if (peek().type == type) return true;
+      }
+      return false;
     }
     private Token advance() {
         if (!isAtEnd()) current++;
