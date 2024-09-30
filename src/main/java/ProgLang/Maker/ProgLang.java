@@ -1,13 +1,5 @@
 package ProgLang.Maker;
-<<<<<<< Updated upstream
-import java.io.FileReader;
-<<<<<<< Updated upstream
 import java.util.Scanner;
-=======
-=======
-import java.util.Scanner;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 /**
  *
  * @author Ophelia

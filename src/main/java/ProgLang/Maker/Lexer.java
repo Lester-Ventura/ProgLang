@@ -22,32 +22,11 @@ enum TokenType{
     /*Literals + Variable*/
     STRINGWORD, INTNUM, IDENTIFIER, FLOATNUM, DOUBLENUM, LONGNUM,
     /*Reserved Keywords*/
-<<<<<<< Updated upstream
-    WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,
-    /*Special Characters */
-<<<<<<< Updated upstream
-    DOLLAR, UNDERSCORE,
-    /* Special Functions */
-    INCREMENT, DECREMENT,
-
-    // Complex Grammar Forms, Delete later if it doesn't fit
-    /* While Do */
-    WHILE_DO,
-    /* Co */
-    /* Constants */
-    BOOLEAN_LITERAL,
-    /* Callable/Variable Statements */
-    CALL, CALLABLE, FUNCTION, ARGS
-=======
-    DOLLAR
-=======
     WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,RETURN,
     /* Special Functions */
     INCREMENT, DECREMENT,
     /* Callable/Variable Statements */
     CALL, CALLABLE, FUNCTION, ARGS
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 }
 class Token{
     final TokenType type;
