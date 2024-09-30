@@ -1,16 +1,33 @@
 package ProgLang.Maker;
 import java.io.FileReader;
+import java.util.Scanner;
 /**
  *
  * @author Ophelia
  */
 public class ProgLang {
     public static void main(String[] args) {    
-        Lexer lexicon = new Lexer();
-        float f = .012f;
-        lexicon.addLineCode("-+*/ while(i<=)");
-        lexicon.lex();
-        lexicon.addLineCode("int pa pa |pregtwe = 025.2341f; \"This is\n a String\" ...");
-        lexicon.lex();
+        Scanner scanner = new Scanner(System.in);  // Create a Scanner object to take user input.
+        Lexer lexicon = new Lexer();  // Create a Lexer object.
+
+        System.out.println("Enter a line of code (or type 'exit' to quit):");
+
+        StringBuilder lineCode = new StringBuilder("");
+
+        while (true) {
+            String inputLine = scanner.next();  // Read a line of input from the user.
+
+            if (inputLine.equalsIgnoreCase("exit")) {  // If the user types 'exit', break the loop.
+                System.out.println("Exiting program.");
+                break;
+            }
+
+            lineCode.append(inputLine);
+        }
+
+        lexicon.addLineCode(lineCode.toString());  // Add the input line of code to the lexer.
+        lexicon.lex();  // Tokenize the line of code.
+
+        scanner.close();  // Close the scanner when done.
     }
 }

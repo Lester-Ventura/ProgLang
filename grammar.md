@@ -1,5 +1,5 @@
 ```xml
-<while-do> → while (<condition>) <block> | while (condition) <statement>
+<while_do> → while (<condition>) <block> | while (condition) <statement>
 
 
 <boolean_literal> → true | false 
