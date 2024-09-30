@@ -25,7 +25,7 @@ public class Parser {
           case TokenType.WHILE -> whileExpr();
           case TokenType.COMMENT -> {continue;}
           case TokenType.EOF -> {return;}
-
+          default -> complain("while");
         }
       }
     }
@@ -121,7 +121,7 @@ public class Parser {
         return tokens.get(current - 1);
       }
       private void complain(String message) throws ExpressionException{
-        throw new ExpressionException("Expected a "+message+"but found "+peek()+" instead");
+        throw new ExpressionException("Expected a "+message+" but found "+peek()+" instead");
       }
 }
 class ExpressionException extends Exception{
