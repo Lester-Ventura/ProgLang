@@ -36,10 +36,13 @@ public class Parser {
 
     }
     private void comparison() throws ExpressionException{
-        if(!(match(numbers())||match(TokenType.CALLABLE)));
+        if(!(match(numbers())||match(TokenType.CALLABLE)))
           complain("Numbers or Function");
-        
-     }
+        if(!match(comparators()))
+          complain("Comparator");
+        if(!match(numbers())||match(TokenType.CALLABLE)||match(booleanLiteral()))
+          complain("Numbers, Function or Boolean");
+     }    
     private void statement() throws ExpressionException{
       
     }
