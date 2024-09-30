@@ -1,2 +1,5 @@
 target/
 /target
+
+*.class
+.vscode/settings.json
