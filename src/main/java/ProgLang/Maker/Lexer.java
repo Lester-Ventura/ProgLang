@@ -18,12 +18,14 @@ enum TokenType{
     BINARYOR, BINARYAND,
     NOT, NOT_EQUALS,
     /* Slash and Backslash */
-    SINGLECOMMENT, MULTICOMMENT, 
+    COMMENT,  
     /*Literals + Variable*/
-    STRINGWORD, NUMBER, IDENTIFIER, FLOATNUM, DOUBLENUM, LONGNUM,
+    STRINGWORD, INTNUM, IDENTIFIER, FLOATNUM, DOUBLENUM, LONGNUM,
     /*Reserved Keywords*/
+<<<<<<< Updated upstream
     WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,
     /*Special Characters */
+<<<<<<< Updated upstream
     DOLLAR, UNDERSCORE,
     /* Special Functions */
     INCREMENT, DECREMENT,
@@ -36,6 +38,16 @@ enum TokenType{
     BOOLEAN_LITERAL,
     /* Callable/Variable Statements */
     CALL, CALLABLE, FUNCTION, ARGS
+=======
+    DOLLAR
+=======
+    WHILE, TRUE, FALSE, BREAK, CONTINUE, FINAL, EOF, BOOLEAN, BYTE, INT, CHAR, FLOAT, DOUBLE,LONG, SHORT, STRING,RETURN,
+    /* Special Functions */
+    INCREMENT, DECREMENT,
+    /* Callable/Variable Statements */
+    CALL, CALLABLE, FUNCTION, ARGS
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 class Token{
     final TokenType type;
@@ -60,6 +72,7 @@ class Token{
     }
 }
 public class Lexer{
+    boolean multiCommentFlag = false; 
     private final List<Token> tokenList = new ArrayList<>();
     private int stringMarcher;
     private int currentLine = 0;
@@ -73,7 +86,10 @@ public class Lexer{
     public void lex(){
         stringMarcher = 0;
         try{
-        while(isNotEnding()){
+        while(isNotEnding()){   
+            if(multiCommentFlag){
+            comment();          
+            }
             TokenRecognizer();
         }
         Iterator<Token> tokenIterator = tokenList.iterator();
@@ -98,8 +114,9 @@ public class Lexer{
                case 'f' ->addIdentifier(TokenType.FLOATNUM,lexeme);
                case 'd' ->addIdentifier(TokenType.DOUBLENUM,lexeme);
                case 'l' ->addIdentifier(TokenType.LONGNUM, lexeme);
-               default -> addIdentifier(TokenType.NUMBER,lexeme);
+               default -> addIdentifier(TokenType.INTNUM,lexeme);
             }
+            forward();
             lexeme = "";
             return;
         }
@@ -125,8 +142,10 @@ public class Lexer{
                 case "true" -> addToken(TokenType.TRUE);
                 case "false" -> addToken(TokenType.FALSE);
                 case "final" -> addToken(TokenType.FINAL);
+                case "return" -> addToken(TokenType.RETURN);
                 default -> addIdentifier(TokenType.IDENTIFIER,lexeme);
           }
+            forward();
             lexeme = "";
             return;
         }
@@ -202,19 +221,25 @@ public class Lexer{
                 addIdentifier(TokenType.STRINGWORD,lexeme);
                 lexeme ="";
             }
-            case '|' -> {if(charLookAhead() == '|')
+            case '|' -> {if(charLookAhead() == '|'){
                         addToken(TokenType.BINARYOR);
+                        forward();}
                         else
                         throw new UnrecognizedTokenException("Unrecognized Token at Line: "+currentLine+" Expected: |");}
-            case '&' -> {if(charLookAhead() == '&')
+            case '&' -> {if(charLookAhead() == '&'){
                         addToken(TokenType.BINARYAND);
+                        forward();}
                         else 
                         throw new UnrecognizedTokenException("Unrecognized Token at Line: "+currentLine+" Expected: &");}
  
             case '/' ->{  
                 switch (charLookAhead()) {
-                case '/' -> addToken(TokenType.SINGLECOMMENT);
-                case '*' -> addToken(TokenType.MULTICOMMENT);
+                case '/' -> addToken(TokenType.COMMENT);
+                case '*' -> {
+                             multiCommentFlag = true; 
+                             comment();
+                             return;
+                            }
                 default -> addToken(TokenType.SLASH); 
                 }
                 forward();
@@ -225,7 +250,30 @@ public class Lexer{
             }
             forward();
     }
+    private void comment(){
+        if(multiCommentFlag){
+            while(isNotEnding()){
+                if(charRead()=='*'){
+                    if(charLookAhead()=='/'){
+                        multiCommentFlag = false;
+                        addIdentifier(TokenType.COMMENT,lexeme);
+                        forward(); forward();
+                        return;
+                        }
+                }
+                lexeme+= charRead();
+                forward();
+            }
+        }
+        else
+            while(isNotEnding()){
+                lexeme+= charRead();
+                forward();
+            }
+        
+            
 
+    }
     public List<Token> getTokens(){
         addToken(TokenType.EOF);
         return tokenList;
@@ -253,7 +301,7 @@ public class Lexer{
         this.tokenList.add(new Token(type,identifier,this.currentLine,this.stringMarcher));
     }
     public boolean isAlphabet(char c){
-        return Pattern.compile("[a-zA-Z]").matcher(String.valueOf(c)).matches();
+        return Pattern.compile("[$_a-zA-Z]").matcher(String.valueOf(c)).matches();
     }
     public boolean isNumerical(char c){
         return Pattern.compile("\\d").matcher(String.valueOf(c)).matches();
