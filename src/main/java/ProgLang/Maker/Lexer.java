@@ -51,12 +51,14 @@ class Token{
     }
 }
 public class Lexer{
-    boolean multiCommentFlag = false; 
+    boolean multiCommentFlag = false;
+    private boolean hasEndOfFile = false;
     private final List<Token> tokenList = new ArrayList<>();
     private int stringMarcher;
     private int currentLine = 0;
     private String line;
     private String lexeme = "";
+    
     Lexer(){}
     public void addLineCode(String code){
         this.line = code;
@@ -80,7 +82,7 @@ public class Lexer{
         }
         catch (Exception e){
             System.err.println("Something went wrong!");
-        }
+        } 
     }
     private void TokenRecognizer() throws UnrecognizedTokenException{
         //Checks for Numbers.
@@ -124,7 +126,7 @@ public class Lexer{
                 case "return" -> addToken(TokenType.RETURN);
                 default -> addIdentifier(TokenType.IDENTIFIER,lexeme);
           }
-            forward();
+            // forward();
             lexeme = "";
             return;
         }
@@ -254,7 +256,9 @@ public class Lexer{
 
     }
     public List<Token> getTokens(){
-        addToken(TokenType.EOF);
+        if (!hasEndOfFile) {
+            addToken(TokenType.EOF);
+        }
         return tokenList;
     }
     private char charLookAhead(){
