@@ -120,8 +120,8 @@ public class Parser {
       private Token previous() {
         return tokens.get(current - 1);
       }
-      private void complain(String message) throws ExpressionException{
-        throw new ExpressionException("Expected a "+message+" but found "+peek()+" instead");
+      private void complain(String expectation) throws ExpressionException{
+        throw new ExpressionException("Expected a "+expectation+" but found "+peek()+" instead");
       }
 }
 class ExpressionException extends Exception{
