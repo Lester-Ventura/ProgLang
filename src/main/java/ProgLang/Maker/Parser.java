@@ -47,8 +47,17 @@ public class Parser {
         whileCondition();
     }
     private void whileStatement() throws ExpressionException{
-      while(!match(TokenType.RIGHTBRACE))
+      while(!match(TokenType.RIGHTBRACE)) { {
+        if (TokenType.EOF == peek().type) {
+          complain("Right curly brace");
+        }
         statement();
+        
+      }
+        
+        System.out.println(peek());
+      }
+        
     }
     private boolean statement()throws ExpressionException{
         if(unaryOperation() || function() || control() || initialization() || assignment()){
