@@ -35,7 +35,7 @@ public class Parser {
       if(!match(TokenType.RIGHTPAREN))
         complain("Right Parenthesis");
       boolean bracePresentFlag = match(TokenType.LEFTBRACE);
-        statement();
+      statement();
       if(bracePresentFlag){ 
         whileStatement();
       }
@@ -50,51 +50,104 @@ public class Parser {
       while(!match(TokenType.RIGHTBRACE))
         statement();
     }
-    private void statement()throws ExpressionException{
-        if(initialization()||assignment()||control()||callable()){
+    private boolean statement()throws ExpressionException{
+        if(unaryOperation() || function() || control() || initialization() || assignment()){
           if(match(TokenType.SEMICOLON)){
-            
+            System.out.println("Matched STATEMENT");
+            return true;
           }
           else
-          complain("SemiColon");
+            complain("SemiColon");
         }
+        return false;
     } 
     
 
     private void comparison() throws ExpressionException{
-        if(match(TokenType.NOT))
-          if(!callable()){ //Case: !Func()
-            complain("Function");}
-        if(!(numberDecimal()||callable())) //Case 2, Func()
-            complain("Number Decimal");
+      if(match(TokenType.NOT)) {
+        if(!callable() || !booleanLiteral()) //Case: !Func()
+          complain("Callable or Boolean Literal Expected");
+      }
+
+
+      else if (booleanLiteral()) {
+        if (!(match(TokenType.EQUAL_EQUAL) || match(TokenType.NOT_EQUALS)))
+          complain("== or !=");
+        if (!(booleanLiteral() || callable()))
+          complain("Callable Value or Boolean Literal Expected");
+      }
+
+      else if (callable()) {
+        // == or != comparison
+        if (match(TokenType.EQUAL_EQUAL) || match(TokenType.NOT_EQUALS))
+          if(!(numberDecimal() || callable() || booleanLiteral())) //Case 2, Func(), 2 or true
+            complain("Numbers, Callable Statement, or Boolean");
+        
+        // the rest of the logical operators
+        if (comparators()) // for simplicity's sake
+          if(!(numberDecimal() || callable() || booleanLiteral())) //Case 2, Func(), 2 or true
+              complain("Numbers, Callable Statement, or Boolean");
+        
+        // could also be a standalone statement
+      }
+
+      // number operations, other data types are disregarded for brevity
+      else {
+        if(!numberDecimal()) //Case 2, Func()
+          complain("Number, Callable Statement or Boolean"); // error throw for all the conditions
         if(!comparators())// All comparators
             complain("Comparison Operator"); 
-        if(match(TokenType.NOT)){ // Case: !Func
-          if(!callable())
-            complain("Function");}
         if(!(numberDecimal()||callable())) //Case 2, Func(), 2 or true
-            complain("Numbers, Function or Boolean");
+            complain("Numbers, Callable Statement");
+      }
+      
      }    
   
     private boolean callable(){
-      if(match(TokenType.IDENTIFIER))
-        if(unary())
-          return true;
-        else if(function())
-          return true;
+      if(function() || unaryOperation() || match(TokenType.IDENTIFIER))
+        return true;
       return false;
     }
+
+
     private boolean function(){
-      while(match(TokenType.DOT))
+      if(!match(TokenType.IDENTIFIER)) {
+        return false;
+      }
+
+      int steps = 0; // counts how many 
+      // steps we have to backtrack
+      while(match(TokenType.DOT)) {
+        steps++;
         if(!match(TokenType.IDENTIFIER)){
+          goBack(steps);
           return false;
         }
+      }
+        
       if(match(TokenType.LEFTPAREN)){
-        //Insert Argument.
+        while (match(TokenType.STRINGWORD) || numberDecimal() || callable()) {
+          if (!match(TokenType.COMMA)) {
+            break;
+          }
+        }
         if(!match(TokenType.RIGHTPAREN))
-           return false;}
+           return false;
+      }
       return true;
     }
+
+    private boolean unaryOperation() {
+      if(!match(TokenType.IDENTIFIER)) {
+        return false;
+      }
+      if (!unary()) {
+        goBack();
+        return false;
+      }
+      return true;
+    }
+
     private boolean numberDecimal(){
       if(match(TokenType.DOT)) // Case: .234[dfl]
         if(match(TokenType.INTNUM,TokenType.FLOATNUM,TokenType.DOUBLENUM,TokenType.LONGNUM))
@@ -109,6 +162,8 @@ public class Parser {
       return match(TokenType.FLOATNUM,TokenType.DOUBLENUM,TokenType.LONGNUM);
        //Case: 20f 30l 40d
     }
+
+
     private boolean initialization() throws ExpressionException{
         if(types())
           if(match(TokenType.IDENTIFIER)){
@@ -128,6 +183,8 @@ public class Parser {
             }
       return false;
     }
+
+
     private boolean assignment() throws ExpressionException{
         if(match(TokenType.IDENTIFIER)){
           if(match(TokenType.EQUAL)){
@@ -140,6 +197,8 @@ public class Parser {
         }
         return false;
     }
+
+
     //Beyond here are the terminals or a combination of terminals.
     private boolean comparators(){
       return match(
@@ -182,10 +241,9 @@ public class Parser {
       );
     }
     private boolean control(){
-      if(match(TokenType.RETURN)){
-        if(callable()||numberDecimal()||match(TokenType.STRING)||match(TokenType.CHARACTER)){
-            return true;
-        }
+      if(match(TokenType.RETURN)){ 
+        if(callable() || numberDecimal() || match(TokenType.STRING) || match(TokenType.CHARACTER) || true)
+            return true; // empty return statements do exist
       }
       if(match(TokenType.BREAK, TokenType.CONTINUE))
         return true;
@@ -210,6 +268,17 @@ public class Parser {
         if (!isAtEnd()) current++;
         return previous();
       }
+
+    private Token goBack() {
+      if (current > 0) 
+        current--;
+      return peek();
+    }
+    private Token goBack(int steps) {
+      current = Math.max(0, current-steps);
+      return peek();
+    }
+
     private boolean isAtEnd() {
         return peek().type == TokenType.EOF;
       }
