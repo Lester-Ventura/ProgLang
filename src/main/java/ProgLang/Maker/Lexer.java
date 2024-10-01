@@ -14,9 +14,10 @@ enum TokenType{
     /*Character Tokens for Comparators */
     GREATERTHAN, GREATERTHAN_EQUAL,
     LESSTHAN, LESSTHAN_EQUAL,
-    EQUAL, EQUAL_EQUAL,
-    BINARYOR, BINARYAND,
-    NOT, NOT_EQUALS,
+    EQUAL, EQUAL_EQUAL, NOT_EQUALS,
+    /* Logical Operators */
+    BINARYOR, BINARYAND, 
+    NOT, // special logical operator
     /*Literals + Variable*/
     STRINGWORD, INTNUM, IDENTIFIER, FLOATNUM, DOUBLENUM, LONGNUM,CHARACTER,
     /*Reserved Keywords*/
@@ -48,6 +49,7 @@ class Token{
 }
 public class Lexer{
     boolean multiCommentFlag = false; 
+    private boolean foundEOF = false;
     private final List<Token> tokenList = new ArrayList<>();
     private int stringMarcher;
     private int currentLine = 0;
@@ -128,10 +130,10 @@ public class Lexer{
             //Closing and Opening Braces
             case '(' -> addToken(TokenType.LEFTPAREN);
             case ')' -> addToken(TokenType.RIGHTPAREN);
-            case '[' -> addToken(TokenType.LEFTBRACE);
-            case ']' -> addToken(TokenType.RIGHTBRACE);
-            case '{' -> addToken(TokenType.LEFTBRACKET);
-            case '}' -> addToken(TokenType.RIGHTBRACKET);
+            case '[' -> addToken(TokenType.LEFTBRACKET);
+            case ']' -> addToken(TokenType.RIGHTBRACKET);
+            case '{' -> addToken(TokenType.LEFTBRACE);
+            case '}' -> addToken(TokenType.RIGHTBRACE);
             case ';' -> addToken(TokenType.SEMICOLON);
             //Operator beside division
             case '-' -> doubleCharacter(TokenType.PLUS,'-',TokenType.DECREMENT);
@@ -159,7 +161,7 @@ public class Lexer{
                 }
                 forward();
             }
-                case ' ' -> {}
+                case ' ', '\t' -> {}
                 default -> throw new UnrecognizedTokenException("Unrecognized Token! \""+charRead()+"\"");
             }
             forward();
@@ -212,7 +214,9 @@ public class Lexer{
         lexeme ="";
     }
     public List<Token> getTokens(){
-        addToken(TokenType.EOF);
+        if (!foundEOF) {
+            addToken(TokenType.EOF);
+        }
         return tokenList;
     }
     private char charLookAhead(){
