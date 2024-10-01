@@ -65,7 +65,7 @@ public class Parser {
 
     private void comparison() throws ExpressionException{
       if(match(TokenType.NOT)) {
-        if(!callable() || !booleanLiteral()) //Case: !Func()
+        if(!(callable() || booleanLiteral())) //Case: !Func()
           complain("Callable or Boolean Literal Expected");
       }
 
