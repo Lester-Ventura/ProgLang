@@ -1,5 +1,5 @@
 ```xml
-<while_do> → while (<condition>) <block> | while (<condition>) <statement>
+<while_do> → while (<condition>) <block> | while (<condition>) <statement>;
 
 
 <block> → <left_terminator> [<statement_list>]<right_terminator>
@@ -7,7 +7,7 @@
 
 <call> → <callable>{<callable>}
 
-<callable> → <variable_id> | <function> // returns some value
+<callable> → <identifier> | <function> | <unary_operation> // returns some value
 
 
 <character> → | /* whitespace */ |<no_whitespace_character> 
@@ -39,7 +39,7 @@
 <string> → “{<character>}”
 
 
-<statement> → <unary> | <callable> | <control>
+<statement> → <unary_operation> | <function> | <control>
 
 
 
@@ -47,11 +47,13 @@
 
 
 
-<unary> → <variable_id>++ | <variable_id>--
+<unary> → ++ | --
+
+<unary_operation>  → <identifier><unary>
 
 
 
-<function> → <variable_id> ([<args>]) 
+<function> → <identifier> {.<identifier>} ([<args>]) 
 
 
 

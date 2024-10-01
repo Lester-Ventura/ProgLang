@@ -2,7 +2,15 @@
 
 A java while-do loop parser built on Java :3
 
+## While Boilerplate Code
+
+---
+
+- these are the sample while statements used to test the parser / lexer
+
 ## settings.json setup
+
+---
 
 - If settings.json got deleted just repopulate it with this value again:
 
