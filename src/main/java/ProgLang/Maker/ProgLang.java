@@ -8,13 +8,13 @@ public class ProgLang {
     public static void main(String[] args) {    
         Scanner scanner = new Scanner(System.in);  // Create a Scanner object to take user input.
         Lexer lexicon = new Lexer();  // Create a Lexer object.
-
+        
         System.out.println("Enter a line of code (or type 'exit' to quit):");
 
         StringBuilder lineCode = new StringBuilder("");
 
         while (true) {
-            String inputLine = scanner.next();  // Read a line of input from the user.
+            String inputLine = scanner.nextLine();  // Read a line of input from the user.
 
             if (inputLine.equalsIgnoreCase("exit")) {  // If the user types 'exit', break the loop.
                 System.out.println("Exiting program.");
@@ -23,10 +23,11 @@ public class ProgLang {
 
             lineCode.append(inputLine);
         }
-
+        
         lexicon.addLineCode(lineCode.toString());  // Add the input line of code to the lexer.
         lexicon.lex();  // Tokenize the line of code.
-
+        Parser parse = new Parser(lexicon.getTokens());
+        parse.parse();
         scanner.close();  // Close the scanner when done.
     }
 }
