@@ -11,9 +11,8 @@ public class Parser {
     this.tokens = tokens;
     System.out.println("Tokens have been loaded");
   }
-
+  /*Starts the parse of the tokens */
   public void parse() {
-    
     try {
       System.out.println("Starting to Parse.");
       expression();
@@ -23,7 +22,7 @@ public class Parser {
       e.printStackTrace();
     }
   }
-
+  /*Starts the  */
   private void expression() throws ExpressionException {
     while (!tokens.isEmpty()) {
       switch (peek().type) { // Assume while start for this program.
@@ -45,7 +44,7 @@ public class Parser {
       whileStatement();
     }
   }
-
+  /* This is going  */
   private void whileCondition() throws ExpressionException {
     boolean ParenFlag = false;
     if (match(TokenType.LEFTPAREN)) {
@@ -66,7 +65,7 @@ public class Parser {
         complain("Right Parenthesis");
     }
   }
-
+  /*This is for going through statement in block form. */
   private void whileStatement() throws ExpressionException {
     while (!match(TokenType.RIGHTBRACE)) {
       {
@@ -90,11 +89,11 @@ public class Parser {
 
   private boolean statement() throws ExpressionException {
     if (control() || initialization() || assignment()) {
+      System.out.println("This worked, somehow");
     } else if (function())
       unary();
     else
       return false;
-
     if (match(TokenType.SEMICOLON)) {
       System.out.println("Matched STATEMENT");
       return true;
@@ -184,8 +183,14 @@ public class Parser {
           break;
         }
       }
-      if (parenFlag)
-        return match(TokenType.RIGHTPAREN);
+      if (parenFlag) 
+        if(match(TokenType.RIGHTPAREN))
+          if(match(TokenType.DOT))
+            return function();
+          else 
+            return true;
+        else
+          return false;
     }
     return true;
   }
@@ -208,7 +213,7 @@ public class Parser {
 
   private boolean initialization() throws ExpressionException {
     if (types()||check(TokenType.IDENTIFIER))
-      if (check(TokenType.IDENTIFIER)) {
+      if (checkForward(TokenType.IDENTIFIER)) {
           match(TokenType.IDENTIFIER);
           match(TokenType.IDENTIFIER);
         if (match(TokenType.EQUAL)) {
@@ -329,7 +334,10 @@ public class Parser {
   private Token previous() {
     return tokens.get(current - 1);
   }
-
+  private boolean checkForward(TokenType token){
+    if(current == tokens.size()){return false;}
+    return token == tokens.get(current+1).type;
+  }
   private boolean complain(String expectation) throws ExpressionException {
     throw new ExpressionException("Expected " + expectation + " but found " + peek().type);
   }
