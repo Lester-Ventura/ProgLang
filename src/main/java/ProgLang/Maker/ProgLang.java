@@ -24,7 +24,6 @@ public class ProgLang {
 
             lineCode.append(inputLine);
         }
-        
         lexicon.addLineCode(lineCode.toString());  // Add the input line of code to the lexer.
         lexicon.lex();  // Tokenize the lin5e of code.
         List<Token> tokenList = lexicon.getTokens();
