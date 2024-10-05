@@ -148,7 +148,7 @@ public class Lexer{
             case '>' -> doubleCharacter(TokenType.GREATERTHAN,'=',TokenType.GREATERTHAN_EQUAL);
             case '|' -> doubleCharacter(null,'|',TokenType.BINARYOR); 
             case '&' -> doubleCharacter(null, '&', TokenType.BINARYAND);
-            case '\"' -> string();
+            case '\"' -> string(); 
             case '\'' -> character(); 
             case '/' ->{  
                 switch (charLookAhead()) {

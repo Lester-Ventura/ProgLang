@@ -67,17 +67,20 @@ public class Parser {
         statement();
       }
       }
-        
     }
     private boolean statement()throws ExpressionException{
-        if(unaryOperation() || function() || control() || initialization() || assignment()){
-          if(match(TokenType.SEMICOLON)){
-            System.out.println("Matched STATEMENT");
-            return true;
-          }
-          else
-            complain("SemiColon");
+        if(control() || initialization() || assignment()){}
+        else if(function())
+        unary();
+        else
+        return false;
+        
+        if(match(TokenType.SEMICOLON)){
+          System.out.println("Matched STATEMENT");
+          return true;
         }
+        else
+          complain("SemiColon");
         return false;
     } 
     
@@ -87,8 +90,6 @@ public class Parser {
         if(!(callable() || booleanLiteral())) //Case: !Func()
           complain("Callable or Boolean Literal Expected");
       }
-
-
       else if (booleanLiteral()) {
         if (!(match(TokenType.EQUAL_EQUAL,TokenType.NOT_EQUALS)))
           complain("== or !=");
@@ -97,75 +98,76 @@ public class Parser {
       }
 
       else if (callable()) {
-        // == or != comparison
-        if (match(TokenType.EQUAL_EQUAL) || match(TokenType.NOT_EQUALS))
-          if(!(numberDecimal() || callable() || booleanLiteral())) //Case 2, Func(), 2 or true
+        while(operators()){ //Special Condtiion to Check
+          if(numberDecimal()||callable()){
+            continue;
+          }}
+          // == or != comparison
+        if (match(TokenType.EQUAL_EQUAL,TokenType.NOT_EQUALS))
+          if(!(operation() || booleanLiteral())) //Case 2, Func(), 2 or true
             complain("Numbers, Callable Statement, or Boolean");
         
         // the rest of the logical operators
         if (comparators()) // for simplicity's sake
-          if(!(numberDecimal() || callable() || booleanLiteral())) //Case 2, Func(), 2 or true
+          if(!(operation() || booleanLiteral())) //Case 2, Func(), 2 or true
               complain("Numbers, Callable Statement, or Boolean");
         
         // could also be a standalone statement
       }
-
+      
       // number operations, other data types are disregarded for brevity
       else {
-        if(!numberDecimal()) //Case 2, Func()
+        if(!operation()) //Case 2, Func()
           complain("Number, Callable Statement or Boolean"); // error throw for all the conditions
         if(!comparators())// All comparators
             complain("Comparison Operator"); 
-        if(!(numberDecimal()||callable())) //Case 2, Func(), 2 or true
+        if(!(operation())) //Case 2, Func(), 2 or true
             complain("Numbers, Callable Statement");
       }
-      
-     }    
-  
-    private boolean callable(){
-      if(function() || unaryOperation() || match(TokenType.IDENTIFIER))
-        return true;
-      return false;
-    }
-
-
-    private boolean function(){
-      if(!match(TokenType.IDENTIFIER)) {
+     } 
+     private boolean operation() throws ExpressionException{
+      if(!(numberDecimal()||callable())){
         return false;
       }
 
-      int steps = 0; // counts how many 
-      // steps we have to backtrack
-      while(match(TokenType.DOT)) {
-        steps++;
-        if(!match(TokenType.IDENTIFIER)){
-          goBack(steps);
-          return false;
+      while(operators()){
+        if(numberDecimal()||callable()){
+          continue;
         }
+        complain("Expected Number,Callable Statement");
       }
-        
+      return true;
+     }   
+  
+    private boolean callable(){
+      if(match(TokenType.IDENTIFIER)){
+        unary();
+        return true;}
+      return false;
+    }
+    
+
+    private boolean function() throws ExpressionException{
+      if(!match(TokenType.IDENTIFIER)) {
+        return false;
+      }
+      if(match(TokenType.DOT)) {
+        function();
+      }
+      boolean parenFlag = false;
       if(match(TokenType.LEFTPAREN)){
-        while (match(TokenType.STRINGWORD) || numberDecimal() || callable()) {
+        parenFlag=true;
+        while (match(TokenType.STRINGWORD) || operation()){
           if (!match(TokenType.COMMA)) {
             break;
           }
         }
-        if(!match(TokenType.RIGHTPAREN))
-           return false;
+        if(parenFlag)
+           return match(TokenType.RIGHTPAREN);
       }
       return true;
     }
 
-    private boolean unaryOperation() {
-      if(!match(TokenType.IDENTIFIER)) {
-        return false;
-      }
-      if (!unary()) {
-        goBack();
-        return false;
-      }
-      return true;
-    }
 
     private boolean numberDecimal(){
       if(match(TokenType.DOT)) // Case: .234[dfl]
@@ -193,7 +195,7 @@ public class Parser {
                 else
                 complain("Object/Primitive");
                 }
-                if(function()||numberDecimal()||match(TokenType.CHARACTER,TokenType.STRINGWORD)){
+                if(function()||operation()||match(TokenType.CHARACTER,TokenType.STRINGWORD)){
                 return true;
               }
               complain("Empty Assignment.");
@@ -203,16 +205,15 @@ public class Parser {
       return false;
     }
 
-
     private boolean assignment() throws ExpressionException{
-        if(match(TokenType.IDENTIFIER)){
+        if(check(TokenType.IDENTIFIER)){
           if(match(TokenType.EQUAL)){
-            if(function()||numberDecimal()||match(TokenType.CHARACTER,TokenType.STRING)){
+            match(TokenType.IDENTIFIER);
+            if(function()||operation()||match(TokenType.CHARACTER,TokenType.STRING)){
                 return true;
-            }
+            } 
             complain("Empty Assignment.");
           }
-          complain("Equal Sign");
         }
         return false;
     }
@@ -259,9 +260,9 @@ public class Parser {
         TokenType.FLOAT
       );
     }
-    private boolean control(){
+    private boolean control() throws ExpressionException{
       if(match(TokenType.RETURN)){ 
-        if(callable() || numberDecimal() || match(TokenType.STRING) || match(TokenType.CHARACTER) || true)
+        if(operation() || match(TokenType.STRING) || match(TokenType.CHARACTER) || true)
             return true; // empty return statements do exist
       }
       if(match(TokenType.BREAK, TokenType.CONTINUE))
@@ -287,17 +288,6 @@ public class Parser {
         if (!isAtEnd()) current++;
         return previous();
       }
-
-    private Token goBack() {
-      if (current > 0) 
-        current--;
-      return peek();
-    }
-    private Token goBack(int steps) {
-      current = Math.max(0, current-steps);
-      return peek();
-    }
-
     private boolean isAtEnd() {
         return peek().type == TokenType.EOF;
       }
@@ -311,7 +301,7 @@ public class Parser {
       }
       private boolean complain(String expectation) throws ExpressionException {
         throw new ExpressionException("Expected "+expectation+" but found "+peek().type);
-      }
+       }
     }
     class ExpressionException extends Exception{
       public ExpressionException(String complaint) {
