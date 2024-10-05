@@ -9,7 +9,7 @@ public class ProgLang {
     public static void main(String[] args) {    
         Scanner scanner = new Scanner(System.in);  // Create a Scanner object to take user input.
         Lexer lexicon = new Lexer();  // Create a Lexer object.
-        
+        {{{{{{{{}}}}}}}}
         System.out.println("Enter a line of code (or type 'exit' after the last '}' to quit):");
 
         StringBuilder lineCode = new StringBuilder("");
@@ -20,6 +20,7 @@ public class ProgLang {
             if (inputLine.equalsIgnoreCase("exit")) {  // If the user types 'exit', break the loop.
                 System.out.println("Exiting program.");
                 break;
+
             }
 
             lineCode.append(inputLine);
