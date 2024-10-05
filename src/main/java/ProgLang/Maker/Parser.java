@@ -176,7 +176,10 @@ public class Parser {
     boolean parenFlag = false;
     if (match(TokenType.LEFTPAREN)) {
       parenFlag = true;
-      while (match(TokenType.STRINGWORD) || operation()) {
+      while (match(TokenType.STRINGWORD) || operation()||function()) {
+        if(match(TokenType.DOT)){
+            function();
+        }
         if (!match(TokenType.COMMA)) {
           break;
         }
