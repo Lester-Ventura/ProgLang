@@ -2,7 +2,6 @@ package ProgLang.Maker;
 import java.util.ArrayList;
 import java.util.List;
 public class Parser {
-    private String complaint = "";
     private List<Token> tokens = new ArrayList<>();
     private int current = 0;
     Parser(List<Token> tokens){
@@ -16,6 +15,7 @@ public class Parser {
           System.out.println("Parse Successful.");
         } catch (ExpressionException e) {
           System.err.println(e.getMessage());
+          e.printStackTrace();
         }          
     }
     private void expression() throws ExpressionException{
@@ -29,11 +29,7 @@ public class Parser {
     }
     private void whileExpr() throws ExpressionException{
       match(TokenType.WHILE);
-      if(!match(TokenType.LEFTPAREN))
-        complain("Left Parenthesis");
       whileCondition(); 
-      if(!match(TokenType.RIGHTPAREN))
-        complain("Right Parenthesis");
       boolean bracePresentFlag = match(TokenType.LEFTBRACE);
       statement();
       if(bracePresentFlag){ 
@@ -41,21 +37,35 @@ public class Parser {
       }
     }
     private void whileCondition() throws ExpressionException{
-      if(!booleanLiteral())
+      boolean ParenFlag=false;
+      if(match(TokenType.LEFTPAREN)){
+            ParenFlag=true;
+        }
+      if(check(TokenType.LEFTPAREN))
+        whileCondition();
+      if(!booleanLiteral()&&!check(TokenType.RIGHTPAREN)&&!check(TokenType.BINARYAND)&&!check(TokenType.BINARYOR))
           comparison();
       if(match(TokenType.BINARYAND,TokenType.BINARYOR))
         whileCondition();
+      if(ParenFlag){
+        if(match(TokenType.RIGHTPAREN))
+          return;
+        else if(match(TokenType.BINARYAND,TokenType.BINARYOR))
+          comparison();
+        else
+          complain("Right Parenthesis");
+      }
     }
     private void whileStatement() throws ExpressionException{
-      while(!match(TokenType.RIGHTBRACE)) { {
+      while(!match(TokenType.RIGHTBRACE)){{
         if (TokenType.EOF == peek().type) {
           complain("Right curly brace");
         }
+        if(check(TokenType.WHILE)){
+          whileExpr();
+        }
         statement();
-        
       }
-        
-        System.out.println(peek());
       }
         
     }
@@ -80,7 +90,7 @@ public class Parser {
 
 
       else if (booleanLiteral()) {
-        if (!(match(TokenType.EQUAL_EQUAL) || match(TokenType.NOT_EQUALS)))
+        if (!(match(TokenType.EQUAL_EQUAL,TokenType.NOT_EQUALS)))
           complain("== or !=");
         if (!(booleanLiteral() || callable()))
           complain("Callable Value or Boolean Literal Expected");

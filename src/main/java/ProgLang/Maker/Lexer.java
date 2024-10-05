@@ -143,13 +143,13 @@ public class Lexer{
             case '=' -> doubleCharacter(TokenType.EQUAL,'=',TokenType.EQUAL_EQUAL);
             case ',' -> addToken(TokenType.COMMA);
             case '.' -> addToken(TokenType.DOT);
-            case '!' ->  doubleCharacter(TokenType.NOT,'=',TokenType.NOT_EQUALS);
+            case '!' -> doubleCharacter(TokenType.NOT,'=',TokenType.NOT_EQUALS);
             case '<' -> doubleCharacter(TokenType.LESSTHAN,'=',TokenType.LESSTHAN_EQUAL);
             case '>' -> doubleCharacter(TokenType.GREATERTHAN,'=',TokenType.GREATERTHAN_EQUAL);
             case '|' -> doubleCharacter(null,'|',TokenType.BINARYOR); 
-            case '&' -> doubleCharacter(null, '|', TokenType.BINARYAND);
+            case '&' -> doubleCharacter(null, '&', TokenType.BINARYAND);
             case '\"' -> string();
-            case '\'' -> character();
+            case '\'' -> character(); 
             case '/' ->{  
                 switch (charLookAhead()) {
                     case '/' -> comment();
