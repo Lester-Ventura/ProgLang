@@ -11,7 +11,8 @@ public class Parser {
     this.tokens = tokens;
     System.out.println("Tokens have been loaded");
   }
-  /*Starts the parse of the tokens */
+
+  /* Starts the parse of the tokens */
   public void parse() {
     try {
       System.out.println("Starting to Parse.");
@@ -22,7 +23,8 @@ public class Parser {
       e.printStackTrace();
     }
   }
-  /*Starts the  */
+
+  /* Starts the */
   private void expression() throws ExpressionException {
     while (!tokens.isEmpty()) {
       switch (peek().type) { // Assume while start for this program.
@@ -44,18 +46,37 @@ public class Parser {
       whileStatement();
     }
   }
-  /* This is going  */
+
+  /* This is going */
   private void whileCondition() throws ExpressionException {
     boolean ParenFlag = false;
+    boolean HasCondFlag = false; // this should throw an error if the condition is empty
+
     if (match(TokenType.LEFTPAREN)) {
       ParenFlag = true;
     }
-    if (check(TokenType.LEFTPAREN))
+
+    // doing this cause comparison does not check parentheses
+    if (check(TokenType.NOT) && checkForward(TokenType.LEFTPAREN)) {
+      match(TokenType.NOT);
       whileCondition();
-    if (!booleanLiteral() && !check(TokenType.RIGHTPAREN) && !check(TokenType.BINARYAND) && !check(TokenType.BINARYOR))
+    }
+
+    // parentheses nesting
+    if (check(TokenType.LEFTPAREN)) {
+      whileCondition();
+    }
+
+    if (!booleanLiteral() && !check(TokenType.RIGHTPAREN) && !check(TokenType.BINARYAND)
+        && !check(TokenType.BINARYOR)) {
       comparison();
+    }
+
+    // extends the while condition
     if (match(TokenType.BINARYAND, TokenType.BINARYOR))
       whileCondition();
+
+    // closes the parentheses
     if (ParenFlag) {
       if (match(TokenType.RIGHTPAREN))
         return;
@@ -65,7 +86,8 @@ public class Parser {
         complain("Right Parenthesis");
     }
   }
-  /*This is for going through statement in block form. */
+
+  /* This is for going through statement in block form. */
   private void whileStatement() throws ExpressionException {
     while (!match(TokenType.RIGHTBRACE)) {
       {
@@ -73,14 +95,14 @@ public class Parser {
         if (TokenType.EOF == peek().type) {
           complain("Right curly brace");
         }
-        if (check(TokenType.WHILE)) 
+        if (check(TokenType.WHILE))
           whileExpr();
         else
           statement();
-        if(match(TokenType.LEFTBRACE)){
+        if (match(TokenType.LEFTBRACE)) {
           whileStatement();
         }
-        if(lastConsume == current){
+        if (lastConsume == current) {
           complain("Statement or While");
         }
       }
@@ -128,8 +150,6 @@ public class Parser {
       if (comparators()) // for simplicity's sake
         if (!(operation() || booleanLiteral())) // Case 2, Func(), 2 or true
           complain("Numbers, Callable Statement, or Boolean");
-
-      // could also be a standalone statement
     }
 
     // number operations, other data types are disregarded for brevity
@@ -157,8 +177,9 @@ public class Parser {
     return true;
   }
 
-  private boolean callable() {
-    if (match(TokenType.IDENTIFIER)) {
+  private boolean callable() throws ExpressionException {
+    if (check(TokenType.IDENTIFIER)) {
+      function(); // could be a function identifier or unary operator all at once :D
       unary();
       return true;
     }
@@ -175,19 +196,19 @@ public class Parser {
     boolean parenFlag = false;
     if (match(TokenType.LEFTPAREN)) {
       parenFlag = true;
-      while (match(TokenType.STRINGWORD) || operation()||function()) {
-        if(match(TokenType.DOT)){
-            function();
+      while (match(TokenType.STRINGWORD) || operation() || function()) {
+        if (match(TokenType.DOT)) {
+          function();
         }
         if (!match(TokenType.COMMA)) {
           break;
         }
       }
-      if (parenFlag) 
-        if(match(TokenType.RIGHTPAREN))
-          if(match(TokenType.DOT))
+      if (parenFlag)
+        if (match(TokenType.RIGHTPAREN))
+          if (match(TokenType.DOT))
             return function();
-          else 
+          else
             return true;
         else
           return false;
@@ -212,10 +233,10 @@ public class Parser {
   }
 
   private boolean initialization() throws ExpressionException {
-    if (types()||check(TokenType.IDENTIFIER))
+    if (types() || check(TokenType.IDENTIFIER))
       if (checkForward(TokenType.IDENTIFIER)) {
-          match(TokenType.IDENTIFIER);
-          match(TokenType.IDENTIFIER);
+        match(TokenType.IDENTIFIER);
+        match(TokenType.IDENTIFIER);
         if (match(TokenType.EQUAL)) {
           if (match(TokenType.NEW)) {
             if (function())
@@ -299,7 +320,15 @@ public class Parser {
     return false;
   }
 
-  // Helper method for token manipulation..
+  /**
+   * <p>
+   * Checks if the token has the same type as any one the input tokens
+   * </p>
+   * <b>!important, this moves the pointer to the next token </b>
+   * 
+   * @param type the type to be compared to
+   * @return true if the token is of the same type
+   */
   private boolean match(TokenType... types) {
     for (TokenType type : types) {
       if (check(type)) {
@@ -311,6 +340,13 @@ public class Parser {
     return false;
   }
 
+  /**
+   * Checks if the token has the same type as the input (does not move to the next
+   * token)
+   * 
+   * @param type the type to be compared to
+   * @return true if the token is of the same type
+   */
   private boolean check(TokenType type) {
     if (isAtEnd())
       return false;
@@ -334,10 +370,14 @@ public class Parser {
   private Token previous() {
     return tokens.get(current - 1);
   }
-  private boolean checkForward(TokenType token){
-    if(current == tokens.size()){return false;}
-    return token == tokens.get(current+1).type;
+
+  private boolean checkForward(TokenType token) {
+    if (current == tokens.size()) {
+      return false;
+    }
+    return token == tokens.get(current + 1).type;
   }
+
   private boolean complain(String expectation) throws ExpressionException {
     throw new ExpressionException("Expected " + expectation + " but found " + peek().type);
   }
