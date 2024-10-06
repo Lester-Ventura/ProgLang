@@ -6,21 +6,22 @@ import java.util.List;
 public class Parser {
   private List<Token> tokens = new ArrayList<>();
   private int current = 0;
-
+  private int tokenMatch = 1;
   Parser(List<Token> tokens) {
     this.tokens = tokens;
-    System.out.println("Tokens have been loaded");
+    System.out.println("Tokens have been loaded into the Parser.");
   }
 
   /* Starts the parse of the tokens */
   public void parse() {
     try {
-      System.out.println("Starting to Parse.");
+      System.out.println("Parse has been initialized the code parse begins.");
+      System.out.println("==========================================================================");
       expression();
-      System.out.println("Parse Successful.");
+      System.out.println("==========================================================================");
+      System.out.println("Parse Successful. It is indeed a correct Syntax");
     } catch (ExpressionException e) {
       System.err.println(e.getMessage());
-      e.printStackTrace();
     }
   }
 
@@ -50,8 +51,7 @@ public class Parser {
   /* This is going */
   private void whileCondition() throws ExpressionException {
     boolean ParenFlag = false;
-    boolean HasCondFlag = false; // this should throw an error if the condition is empty
-
+  
     if (match(TokenType.LEFTPAREN)) {
       ParenFlag = true;
     }
@@ -78,8 +78,14 @@ public class Parser {
 
     // closes the parentheses
     if (ParenFlag) {
-      if (match(TokenType.RIGHTPAREN))
-        return;
+      if (check(TokenType.RIGHTPAREN)){
+        if(previous().type==TokenType.LEFTPAREN){
+          complain("Condition");
+        }
+        else 
+          match(TokenType.RIGHTPAREN);
+      }
+        
       else if (match(TokenType.BINARYAND, TokenType.BINARYOR))
         comparison();
       else
@@ -117,7 +123,6 @@ public class Parser {
     else
       return false;
     if (match(TokenType.SEMICOLON)) {
-      System.out.println("Matched STATEMENT");
       return true;
     } else
       complain("SemiColon");
@@ -136,9 +141,9 @@ public class Parser {
     }
 
     else if (callable()) {
-      while (operators()) { // Special Condtiion to Check
+      while (operators()) { // Special Condtiion to Check consumes the tokens.
         if (numberDecimal() || callable()) {
-          continue;
+
         }
       }
       // == or != comparison
@@ -193,9 +198,8 @@ public class Parser {
     if (match(TokenType.DOT)) {
       function();
     }
-    boolean parenFlag = false;
     if (match(TokenType.LEFTPAREN)) {
-      parenFlag = true;
+      boolean parenFlag = true;
       while (match(TokenType.STRINGWORD) || operation() || function()) {
         if (match(TokenType.DOT)) {
           function();
@@ -271,7 +275,7 @@ public class Parser {
     }
     return false;
   }
-
+  
   // Beyond here are the terminals or a combination of terminals.
   private boolean comparators() {
     return match(
@@ -317,7 +321,7 @@ public class Parser {
 
   private boolean control() throws ExpressionException {
     if (match(TokenType.RETURN)) {
-      if (operation() || match(TokenType.STRING) || match(TokenType.CHARACTER) || true)
+      if (operation() || match(TokenType.STRINGWORD) || match(TokenType.CHARACTER) || true)
         return true; // empty return statements do exist
     }
     if (match(TokenType.BREAK, TokenType.CONTINUE))
@@ -337,7 +341,8 @@ public class Parser {
   private boolean match(TokenType... types) {
     for (TokenType type : types) {
       if (check(type)) {
-        System.out.println("Matched " + type);
+        System.out.println("Token #"+tokenMatch +" was matched| Type: "+type);
+        tokenMatch++;
         advance();
         return true;
       }

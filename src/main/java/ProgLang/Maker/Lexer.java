@@ -55,8 +55,7 @@ class Token {
 }
 
 public class Lexer {
-    boolean multiCommentFlag = false;
-    private boolean foundEOF = false;
+    private boolean multiCommentFlag = false;
     private final List<Token> tokenList = new ArrayList<>();
     private int stringMarcher;
     private int currentLine = 0;
@@ -80,9 +79,12 @@ public class Lexer {
                 TokenRecognizer();
             }
             Iterator<Token> tokenIterator = tokenList.iterator();
+            System.out.println("Showing the resulting tokenized code.");
+            System.out.println("========================================================================");
             while (tokenIterator.hasNext()) {
                 System.out.println("Token: [" + tokenIterator.next().toString() + "]");
             }
+            System.out.println("========================================================================");
         } catch (UnrecognizedTokenException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
@@ -234,9 +236,7 @@ public class Lexer {
     }
 
     public List<Token> getTokens() {
-        if (!foundEOF) {
-            addToken(TokenType.EOF);
-        }
+        addToken(TokenType.EOF);
         return tokenList;
     }
 
