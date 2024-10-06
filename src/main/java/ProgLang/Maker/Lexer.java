@@ -225,12 +225,14 @@ public class Lexer {
             addToken(singleToken);
     }
 
-    private void string() {
+    private void string() throws UnrecognizedTokenException{
+    do{
+        forward();
         lexeme += charRead();
-        do {
-            forward();
-            lexeme += charRead();
-        } while (charRead() != '"');
+        if(!isNotEnding()){
+            throw new UnrecognizedTokenException(" \" not found");
+        }
+    } while (charRead() != '"');
         addIdentifier(TokenType.STRINGWORD, lexeme);
         lexeme = "";
     }
