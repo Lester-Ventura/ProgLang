@@ -1,10 +1,7 @@
 package ProgLang.Maker;
 import java.util.List;
 import java.util.Scanner;
-/**
- *
- * @author Ophelia
- */
+
 public class ProgLang {
     public static void main(String[] args) {    
         Scanner scanner = new Scanner(System.in);  // Create a Scanner object to take user input.

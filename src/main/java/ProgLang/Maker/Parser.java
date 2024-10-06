@@ -21,6 +21,7 @@ public class Parser {
       System.out.println("==========================================================================");
       System.out.println("Parse Successful. It is indeed a correct Syntax");
     } catch (ExpressionException e) {
+      System.out.println("==========================================================================");
       System.err.println(e.getMessage());
     }
   }
@@ -389,6 +390,7 @@ public class Parser {
   }
 
   private boolean complain(String expectation) throws ExpressionException {
+
     throw new ExpressionException("Expected " + expectation + " but found " + peek().type);
   }
 }

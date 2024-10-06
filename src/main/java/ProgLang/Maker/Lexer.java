@@ -166,7 +166,7 @@ public class Lexer {
             case '/' -> {
                 switch (charLookAhead()) {
                     case '/' -> comment();
-                    case '*' -> {
+                       case '*' -> {
                         multiCommentFlag = true;
                         comment();
                         return;
