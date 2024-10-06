@@ -111,7 +111,7 @@ public class Parser {
 
   private boolean statement() throws ExpressionException {
     if (control() || initialization() || assignment()) {
-      System.out.println("This worked, somehow");
+      // System.out.println("This worked, somehow");
     } else if (function())
       unary();
     else
@@ -233,36 +233,41 @@ public class Parser {
   }
 
   private boolean initialization() throws ExpressionException {
-    if (types() || check(TokenType.IDENTIFIER))
-      if (checkForward(TokenType.IDENTIFIER)) {
-        match(TokenType.IDENTIFIER);
-        match(TokenType.IDENTIFIER);
-        if (match(TokenType.EQUAL)) {
-          if (match(TokenType.NEW)) {
-            if (function())
-              return true;
-            else
-              complain("Object/Primitive");
-          }
-          if (function() || operation() || match(TokenType.CHARACTER, TokenType.STRINGWORD)) {
-            return true;
-          }
-          complain("Empty Assignment.");
-        }
-        return true;
-      }
-    return false;
+    // Guard clausing to reduce nesting
+    if (!((types() || check(TokenType.IDENTIFIER) && checkForward(TokenType.IDENTIFIER)))) {
+      return false;
+    }
+    // cleaning up the object identifiers
+    if (check(TokenType.IDENTIFIER) && checkForward(TokenType.IDENTIFIER))
+      match(TokenType.IDENTIFIER);
+
+    // Checks if it is also an assignment
+    // Then cleans up if not
+    if (!assignment()) {
+      match(TokenType.IDENTIFIER);
+    }
+
+    // Pure declarations will also initialize
+    return true;
   }
 
   private boolean assignment() throws ExpressionException {
-    if (check(TokenType.IDENTIFIER)) {
-      if (match(TokenType.EQUAL)) {
-        match(TokenType.IDENTIFIER);
-        if (function() || operation() || match(TokenType.CHARACTER, TokenType.STRING)) {
+
+    if (check(TokenType.IDENTIFIER) && checkForward(TokenType.EQUAL)) {
+      // Cleanup
+      match(TokenType.IDENTIFIER);
+      match(TokenType.EQUAL);
+
+      if (match(TokenType.NEW)) {
+        if (function())
           return true;
-        }
-        complain("Empty Assignment.");
+        else
+          complain("Object/Primitive");
       }
+      if (function() || operation() || match(TokenType.CHARACTER, TokenType.STRINGWORD)) {
+        return true;
+      }
+      complain("Empty Assignment.");
     }
     return false;
   }
