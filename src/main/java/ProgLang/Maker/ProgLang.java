@@ -1,15 +1,11 @@
 package ProgLang.Maker;
 import java.util.List;
 import java.util.Scanner;
-/**
- *
- * @author Ophelia
- */
+
 public class ProgLang {
     public static void main(String[] args) {    
         Scanner scanner = new Scanner(System.in);  // Create a Scanner object to take user input.
         Lexer lexicon = new Lexer();  // Create a Lexer object.
-        {{{{{{{{}}}}}}}}
         System.out.println("Enter a line of code (or type 'exit' after the last '}' to quit):");
 
         StringBuilder lineCode = new StringBuilder("");
@@ -22,7 +18,7 @@ public class ProgLang {
                 break;
 
             }
-
+            
             lineCode.append(inputLine);
         }
         lexicon.addLineCode(lineCode.toString());  // Add the input line of code to the lexer.
