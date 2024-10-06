@@ -7,6 +7,7 @@ public class Parser {
   private List<Token> tokens = new ArrayList<>();
   private int current = 0;
   private int tokenMatch = 1;
+
   Parser(List<Token> tokens) {
     this.tokens = tokens;
     System.out.println("Tokens have been loaded into the Parser.");
@@ -52,7 +53,7 @@ public class Parser {
   /* This is going */
   private void whileCondition() throws ExpressionException {
     boolean ParenFlag = false;
-  
+
     if (match(TokenType.LEFTPAREN)) {
       ParenFlag = true;
     }
@@ -79,14 +80,13 @@ public class Parser {
 
     // closes the parentheses
     if (ParenFlag) {
-      if (check(TokenType.RIGHTPAREN)){
-        if(previous().type==TokenType.LEFTPAREN){
+      if (check(TokenType.RIGHTPAREN)) {
+        if (previous().type == TokenType.LEFTPAREN) {
           complain("Condition");
-        }
-        else 
+        } else
           match(TokenType.RIGHTPAREN);
       }
-        
+
       else if (match(TokenType.BINARYAND, TokenType.BINARYOR))
         comparison();
       else
@@ -269,14 +269,14 @@ public class Parser {
         else
           complain("Object/Primitive");
       }
-      if (function() || operation() || match(TokenType.CHARACTER, TokenType.STRINGWORD)) {
+      if (operation() || match(TokenType.CHARACTER, TokenType.STRINGWORD)) {
         return true;
       }
       complain("Empty Assignment.");
     }
     return false;
   }
-  
+
   // Beyond here are the terminals or a combination of terminals.
   private boolean comparators() {
     return match(
@@ -342,7 +342,7 @@ public class Parser {
   private boolean match(TokenType... types) {
     for (TokenType type : types) {
       if (check(type)) {
-        System.out.println("Token #"+tokenMatch +" was matched| Type: "+type);
+        System.out.println("Token #" + tokenMatch + " was matched| Type: " + type);
         tokenMatch++;
         advance();
         return true;
